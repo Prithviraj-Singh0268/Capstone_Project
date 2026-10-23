@@ -44,9 +44,9 @@ class MediaPipeEmotionDetector:
                 min_face_presence_confidence=0.5,
             )
             self.detector = vision.FaceLandmarker.create_from_options(options)
-            print("✅ MediaPipe (Tasks API) initialized successfully")
+            print("[OK] MediaPipe (Tasks API) initialized successfully")
         except Exception as e:
-            print(f"⚠️ Error initializing MediaPipe Tasks: {e}")
+            print(f"[WARNING] Error initializing MediaPipe Tasks: {e}")
             self.detector = None
     
     def detect(self, frame) -> List[Dict]:

@@ -277,6 +277,7 @@ class SessionManager:
             
         return {
             "active": self.active_session_id is not None,
+            "session_active": self.active_session_id is not None,
             "session_id": self.active_session_id,
             "people_count": len(self.person_history),
             "duration": round(elapsed, 1),

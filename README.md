@@ -1,209 +1,239 @@
-🎥 Multimodal Attendance & Engagement Agent
+# Multimodal Attendance & Engagement Agent
+> **Generative AI Capstone Certification Project**  
+> *Real-time multimodal session monitoring, presence-based attendance verification, and explainable AI insights powered by Google Gemini.*
 
-An AI-powered, offline system that automates attendance tracking, analyzes class engagement, and generates actionable insights for both instructors and students using multimodal signals such as video and audio.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python: 3.12](https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19-61DAFB.svg?logo=react&logoColor=black)](https://react.dev)
+[![Google Gemini](https://img.shields.io/badge/AI-Google%20Gemini-4285F4.svg?logo=google&logoColor=white)](https://ai.google.dev)
+[![Tests: Passing](https://img.shields.io/badge/Tests-16%20Passed-success.svg)](backend/tests)
 
-📌 Project Motivation
+---
 
-Traditional attendance systems capture only presence, ignoring engagement, attention trends, and session dynamics. In real classrooms and training environments, instructors lack objective feedback on when engagement drops, while students receive no insight into their participation patterns.
+## 📌 Executive Summary & Architecture
 
-This project bridges that gap by introducing a multimodal AI agent that:
+Traditional educational attendance tools merely take a static snapshot of presence at a single moment in time, providing zero visibility into active attention or classroom dynamics. 
 
-Tracks attendance through visual presence
+The **Multimodal Attendance & Engagement Agent** continuously monitors real-time classroom sessions by fusing two distinct non-invasive telemetry streams:
+1. **Vision Stream**: Tracks participant faces across video frames to accumulate **continuous active presence** and compute visual attention vectors (pitch/yaw/roll head pose and eye contact proxy).
+2. **Audio Stream**: Samples 16kHz PCM microphone audio to evaluate calibrated acoustic sound pressure (30–95 dB SPL) and speech activity via Zero-Crossing Rate (ZCR).
 
-Analyzes engagement signals across time
+The telemetry is fused deterministically and forwarded as aggregated time-window summaries to **Google Gemini** to produce structured, explainable pedagogical suggestions and individual participant reflections.
 
-Generates AI-driven teaching suggestions
+```mermaid
+graph TD
+    A[Browser Webcam] -->|WebSocket: Video Frames| B[FastAPI Backend]
+    C[Web Audio API: 16kHz PCM] -->|WebSocket: Audio Chunks| B
+    
+    subgraph Vision Pipeline
+        B --> D[MediaPipe FaceLandmarker]
+        D --> E[DeepSORT Tracker]
+        E --> F[Anonymous ID Assignment<br/>Participant 01, Participant 02]
+        F --> G[Active Presence Accumulation]
+    end
+    
+    subgraph Audio Pipeline
+        B --> H[RMS Energy & Decibel Calibration<br/>30 - 95 dB SPL]
+        H --> I[Zero-Crossing Rate ZCR]
+        I --> J[Speech vs Noise Activity Ratio]
+    end
+    
+    G --> K[Multimodal Fusion Engine]
+    J --> K
+    
+    K --> L["Deterministic Engagement Score<br/>E = 0.40(Attn) + 0.30(Pres) + 0.15(Act) + 0.15(Noise)"]
+    L --> M[SQLite Database]
+    L --> N[Structured Summary Payload<br/>(No Raw Video Frames)]
+    
+    N --> O[Google Gemini Multimodal Agent<br/>gemini-2.0-flash / Pydantic Schemas]
+    O --> P[StructuredAIInsights<br/>Live Teaching Suggestions]
+    O --> Q[StudentReflection<br/>Explainable Participant Modal]
+    
+    P --> R[React 19 Dashboard]
+    Q --> R
+    M --> S[PDF & CSV Report Exports]
+```
 
-Provides session analytics for students
+---
 
-Operates fully offline, ensuring privacy
+## 🎯 Mandatory Capstone Epics Completed
 
-🧠 System Overview
-Video Stream  ──► Vision Module ──┐
-                                 ├──► Multimodal Agent ──► Insights & Reports
-Audio Stream  ──► Audio Module ───┘
+| Epic | Specification | Implementation Highlights | Status |
+| :--- | :--- | :--- | :---: |
+| **Epic 1** | Requirements & Environment Setup | Python 3.12 pinned requirements, automated `.bat` setup scripts, `.env.example`, clean Git baseline. | ✅ Complete |
+| **Epic 2** | Computer Vision & Presence Attendance | MediaPipe FaceLandmarker + DeepSORT. Continuous active duration accumulation. Thresholds: $\ge 75\%$ Present, $40-74\%$ Partial, $<40\%$ Absent. Anonymous IDs only. | ✅ Complete |
+| **Epic 3** | Audio Processing & Speech Activity | 16kHz PCM Web Audio API, RMS energy, calibrated dB SPL (30–95 dB), Zero-Crossing Rate (ZCR) speech ratio. | ✅ Complete |
+| **Epic 4** | Multimodal Fusion & Gemini Integration | Deterministic fusion formula (0–100 score). Google Gemini agent with Pydantic structured schemas and telemetry-grounded local fallback. | ✅ Complete |
+| **Epic 5** | Analytics, Explainability & Reports | Multimodal time-series trends (attention + noise dB + speech %). Explainable student reflection modal. PDF & CSV report exports. | ✅ Complete |
+| **Epic 6** | Interface, Testing & Deployment | Real-time React 19 dashboard, automated unit test suite (16 tests, 100% pass), production-ready documentation. | ✅ Complete |
 
+---
 
-The agent fuses multimodal signals and applies interpretable logic to produce structured, human-readable outputs.
+## 🔒 Privacy & Ethical Design Guarantees
 
-🚀 Key Features
-✅ Vision-Based Attendance
+In compliance with strict educational privacy standards:
+- **Anonymous Identifiers Only**: All participants are identified sequentially as `Participant 01`, `Participant 02`, etc.
+- **Zero Facial Recognition**: No biometric facial databases, facial embedding comparisons, or personal identity matching.
+- **No Emotion Pseudoscience**: Banned unscientific emotion classifiers (no "happy", "sad", "angry" labels). System relies strictly on physical head pose, eye gaze vectors, and vocal acoustic activity.
+- **Cloud Privacy**: Google Gemini receives **only compact aggregated numerical statistics** (average attention %, noise dB, speech ratio %). **Raw video frames are never transmitted over the internet.**
+- **Non-Judgmental Pedagogical Reflection**: AI student reflections are strictly constructive, supportive, and free of evaluative grading.
 
-Face detection and tracking across frames
+---
 
-Presence-duration–based attendance marking
+## 📐 Deterministic Engagement Formula
 
-Duplicate and false-detection handling
+Engagement is calculated deterministically by [`MultimodalFusionEngine`](backend/core/multimodal_fusion.py) before feeding into AI reasoning:
 
-👀 Engagement Estimation
+$$\text{Engagement Score} = 100 \times \left( 0.40 \cdot \bar{A} + 0.30 \cdot P + 0.15 \cdot S + 0.15 \cdot Q_{\text{noise}} \right)$$
 
-Head pose and movement analysis
+Where:
+- $\bar{A} \in [0, 1]$: Mean visual attention across participants based on gaze orientation and head pose stability.
+- $P \in [0, 1]$: Active participant presence ratio relative to elapsed session duration.
+- $S \in [0, 1]$: Verbal activity and speech ratio derived from audio Zero-Crossing Rate.
+- $Q_{\text{noise}} \in [0, 1]$: Inverse acoustic noise penalty ($1.0$ in quiet/moderate lecture conditions $\le 65\text{ dB}$, degrading gracefully if ambient sound exceeds $70\text{ dB}$).
 
-Detection of prolonged inactivity or distraction
+Engagement classifications:
+- **$\ge 75.0$**: *High Engagement* (Optimal classroom pacing)
+- **$50.0 - 74.9$**: *Moderate Engagement* (Normal lecture state)
+- **$30.0 - 49.9$**: *Low Attention* (Interactive check-in recommended)
+- **$< 30.0$**: *Inactive / Distracted* (Instructor intervention alert)
 
-Temporal engagement scoring across the session
+---
 
-🔊 Audio Awareness (Optional)
+## 🛠️ Technology Stack
 
-Ambient noise level monitoring
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Frontend** | React 19, Tailwind CSS, Lucide React, Recharts, Vite |
+| **Backend API** | FastAPI, Uvicorn, WebSockets, Pydantic v2 |
+| **Computer Vision** | MediaPipe FaceLandmarker (Tasks API), DeepSORT Realtime, OpenCV |
+| **Audio Processing** | Web Audio API (Browser AudioContext), NumPy PCM Processing |
+| **Generative AI** | Google Gemini API (`gemini-2.0-flash` via `google-genai` / `google-generativeai`) |
+| **Persistence** | SQLite, SQLAlchemy ORM |
+| **Reporting** | ReportLab (PDF generation), Pandas (CSV exports) |
+| **Automated Testing** | Python `unittest` / `pytest` test suite |
 
-Speech activity detection
+---
 
-Session-level interaction cues
+## 🚀 Quickstart & Setup Guide
 
-🧩 Agent-Based Reasoning
+### 1. Prerequisites
+- **Python 3.12** installed and accessible via PATH.
+- **Node.js 18+** and `npm` installed.
+- A functional webcam and microphone.
+- *(Optional)* A Google Gemini API Key from [Google AI Studio](https://aistudio.google.com/).
 
-Aggregates multimodal signals
+### 2. Automated One-Click Setup (Windows)
+Double-click [`setup_environment.bat`](setup_environment.bat) or run from terminal:
+```cmd
+setup_environment.bat
+```
 
-Applies rule-based and threshold logic
+### 3. Manual Installation
 
-Produces explainable, structured decisions
+#### Backend Setup
+```bash
+# Navigate to backend and create virtual environment
+python -m venv venv
+.\venv\Scripts\activate
 
-🧑‍🏫 AI-Driven Teaching Suggestions
-
-Beyond analytics, the system provides context-aware recommendations to assist instructors during or after a session.
-
-Examples include:
-
-“Engagement dropped after 30 minutes — consider a short interactive activity.”
-
-“Low verbal participation detected — encourage student questions.”
-
-“High background noise observed — classroom management intervention may help.”
-
-“Peak engagement occurred during visual explanations.”
-
-These suggestions are:
-
-Assistive, not prescriptive
-
-Designed to support human decision-making
-
-Fully explainable and grounded in observed signals
-
-👨‍🎓 Class Session Analytics for Students
-
-The agent also generates student-facing session analytics, enabling learners to reflect on their participation patterns.
-
-Student-Level Insights:
-
-Attendance duration
-
-Engagement trend over time
-
-Periods of high and low attention
-
-Session participation summary
-
-Example Analytics:
-
-“High engagement during the first half of the session.”
-
-“Reduced attention observed during extended lecture segments.”
-
-“Consistent presence throughout the class.”
-
-These insights encourage self-awareness and improvement, without grading or evaluation.
-
-📄 Structured Reports
-
-The system produces:
-
-Timestamped attendance logs
-
-Engagement timelines
-
-Instructor suggestions
-
-Student session analytics
-
-Session-level summaries
-
-All outputs are generated in structured formats suitable for dashboards or exports.
-
-🛠️ Tech Stack
-Component	Technology
-Computer Vision	OpenCV, MediaPipe
-Audio Processing	Librosa
-AI Logic	Python (Agent-based design)
-Interface	Streamlit (Optional)
-Deployment	Offline / Local Execution
-📂 Project Structure
-multimodal-attendance-agent/
-│
-├── vision/
-│   └── face_tracking.py
-├── audio/
-│   └── noise_analysis.py
-├── agent/
-│   └── decision_engine.py
-├── analytics/
-│   └── session_metrics.py
-├── utils/
-│   └── helpers.py
-├── app.py
-├── requirements.txt
-└── README.md
-
-⚙️ Installation
-git clone https://github.com/your-username/multimodal-attendance-agent.git
-cd multimodal-attendance-agent
+# Install dependencies
 pip install -r requirements.txt
 
-▶️ Usage
-python app.py
+# Configure environment variables
+cp .env.example .env
+# Edit .env and enter your GEMINI_API_KEY (optional; system will use grounded fallback if unset)
+```
 
+#### Frontend Setup
+```bash
+cd frontend
+npm install
+```
 
-(Optional Dashboard)
+### 4. Running the System
+You can launch both backend and frontend automatically with [`start_system.bat`](start_system.bat):
+```cmd
+start_system.bat
+```
 
-streamlit run app.py
+Or run manually in separate terminals:
+```bash
+# Terminal 1: Backend
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 
-🎯 Use Cases
+# Terminal 2: Frontend
+cd frontend
+npm run dev
+```
 
-Educational institutions
+Open your browser at `http://localhost:5173`.
 
-Corporate training programs
+---
 
-Workshops and seminars
+## 🧪 Automated Test Suite
 
-Offline attendance auditing
+The project includes an automated test suite validating every core module:
+```bash
+python -m unittest discover backend/tests
+```
 
-🔐 Privacy & Ethics
+### Test Coverage Highlights:
+- **`test_audio_analysis.py`**: Tests silence rejection, synthetic speech recognition, RMS calculation, and 30–95 dB SPL calibration limits.
+- **`test_multimodal_fusion.py`**: Tests mathematical weight verification, bounded 0–100 score limits, engagement state transitions, and Gemini payload safety (zero raw video frame leakage).
+- **`test_gemini_agent.py`**: Validates `StructuredAIInsights` and `StudentReflection` Pydantic models, deterministic grounded fallback, and constructive coaching language.
+- **`test_attendance_logic.py`**: Tests anonymous ID generation (`Participant 01`), continuous presence accumulation, threshold grading ($\ge 75\%$ Present, $40-74\%$ Partial, $<40\%$ Absent), and session lifecycles.
 
-Fully offline execution
+---
 
-No cloud dependency
+## 📂 Project Structure
 
-No facial data storage
+```
+Multimodal-attendance-agent-/
+├── backend/
+│   ├── core/
+│   │   ├── analytics_service.py       # Multimodal trend aggregation (attention + audio)
+│   │   ├── audio_analysis.py          # RMS, calibrated dB SPL, ZCR speech ratio
+│   │   ├── camera_service.py          # OpenCV video capture service
+│   │   ├── database.py                # SQLite schema (Session, Person, AudioMetric)
+│   │   ├── emotion_detector_v2.py     # MediaPipe Tasks FaceLandmarker
+│   │   ├── gemini_agent.py            # Gemini Multimodal Agent & Pydantic models
+│   │   ├── multimodal_fusion.py       # Deterministic fusion scoring engine
+│   │   ├── recommendations_engine.py  # Rule-based real-time alerts
+│   │   ├── report_generator.py        # PDF & CSV generation engine
+│   │   └── session_manager.py         # Session lifecycle & DeepSORT tracking
+│   ├── tests/
+│   │   ├── test_attendance_logic.py   # Presence thresholds & anonymous ID tests
+│   │   ├── test_audio_analysis.py     # RMS & ZCR speech detection tests
+│   │   ├── test_gemini_agent.py       # Pydantic schema & fallback tests
+│   │   └── test_multimodal_fusion.py  # Engagement scoring formula tests
+│   └── main.py                        # FastAPI application & WebSocket endpoints
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── AnalyticsPage.jsx      # Multimodal trends & reflection modal
+│   │   │   ├── AttendanceDashboard.jsx# Main classroom monitoring view
+│   │   │   ├── AudioCapture.jsx       # Web Audio API 16kHz PCM streamer
+│   │   │   ├── MetricsPanel.jsx       # Live telemetry & AI insights panel
+│   │   │   ├── RecommendationsPanel.jsx# Live teacher alert banners
+│   │   │   ├── Sidebar.jsx            # Session controls & timer
+│   │   │   └── SuggestionBox.jsx      # Gemini prioritized recommendations
+│   │   └── App.jsx
+│   └── package.json
+├── AUDIT_REPORT.md                    # Forensic architectural audit & gap analysis
+├── LICENSE                            # MIT License with dual attribution
+├── requirements.txt                   # Root Python dependencies
+├── setup_environment.bat              # One-click environment configuration
+├── start_system.bat                   # One-click dual-server launcher
+└── README.md                          # Technical documentation
+```
 
-No student grading or profiling
+---
 
-Designed strictly as a decision-support system
+## 📜 License & Attribution
 
-🚧 Limitations
+This project is licensed under the **MIT License** — see the [`LICENSE`](LICENSE) file for details.
 
-Engagement estimation is heuristic-based
-
-Camera placement affects accuracy
-
-Suggestions are advisory, not authoritative
-
-📌 Future Enhancements
-
-Multi-camera support
-
-Long-term engagement trend analysis
-
-Adaptive thresholds using ML
-
-LMS integration
-
-📜 License
-
-MIT License
-
-🙌 Acknowledgments
-
-OpenCV & MediaPipe communities
-
-Open-source AI contributors
+- **Original Starter Codebase**: [Rohith K](https://github.com/Rohithk05/Multimodal-attendance-agent-)
+- **Architecture, Multimodal Refactoring & Capstone Implementation**: **Prithviraj Singh** ([@Prithviraj-Singh0268](https://github.com/Prithviraj-Singh0268))
