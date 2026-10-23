@@ -51,8 +51,22 @@ class SessionStartRequest(BaseModel):
     teacher_id: str
     class_id: str
 
+dist_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
+
 @app.get("/")
 async def root():
+    index_file = os.path.join(dist_path, "index.html")
+    if os.path.exists(index_file):
+        from fastapi.responses import FileResponse
+        return FileResponse(index_file)
+    return {
+        "message": "Multimodal Attendance & Engagement Agent running",
+        "status": "online",
+        "ai_engine": "Google Gemini (Structured Outputs)" if gemini_agent.client else "Deterministic Grounded Engine"
+    }
+
+@app.get("/api/status")
+async def api_status():
     return {
         "message": "Multimodal Attendance & Engagement Agent running",
         "status": "online",
