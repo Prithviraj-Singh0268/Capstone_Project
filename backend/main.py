@@ -67,6 +67,7 @@ async def get_ai_suggestions():
 # Session Endpoints
 @app.post("/api/session/start")
 async def start_session(req: SessionStartRequest):
+    audio_analyzer.reset_session()
     result = session_manager.start_session(req.teacher_id, req.class_id)
     if result.get("status") == "error":
         raise HTTPException(status_code=500, detail=result.get("message"))
@@ -176,12 +177,12 @@ async def audio_endpoint(websocket: WebSocket):
             metrics = audio_analyzer.analyze_audio_chunk(audio_array)
             if metrics:
                 await websocket.send_json(metrics)
-                if session_manager.active_session_id and (time.time() - last_db_log > 5.0):
+                if session_manager.active_session_id and (time.time() - last_db_log > 3.0):
                     from core.database import AudioMetric
                     db_metric = AudioMetric(
                         session_id=str(session_manager.active_session_id),
                         noise_db=metrics['noise_db'],
-                        speech_ratio=0.0, 
+                        speech_ratio=metrics['speech_ratio'], 
                         activity_type=metrics['activity_type']
                     )
                     db.add(db_metric)
@@ -191,6 +192,10 @@ async def audio_endpoint(websocket: WebSocket):
         print(f"Audio Error: {e}")
     finally:
         db.close()
+
+@app.get("/api/audio/summary")
+async def get_audio_summary():
+    return audio_analyzer.get_session_summary()
 
 if __name__ == "__main__":
     import uvicorn

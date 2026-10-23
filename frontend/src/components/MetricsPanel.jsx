@@ -54,17 +54,23 @@ const MetricsPanel = ({ emotionCounts, audioMetrics, insights, loadingInsights, 
                 <h3 className="text-slate-200 font-semibold mb-3 flex items-center">
                     <Volume2 size={18} className="mr-2 text-blue-400" /> Audio Context
                 </h3>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                     <div className="bg-slate-700/50 p-2 rounded">
-                        <div className="text-xs text-slate-400">Noise Level</div>
-                        <div className="text-lg font-mono font-bold text-slate-200">
+                        <div className="text-[11px] text-slate-400">Noise Level</div>
+                        <div className="text-base font-mono font-bold text-slate-200">
                             {audioMetrics?.noise_db ? `${audioMetrics.noise_db.toFixed(1)} dB` : '--'}
                         </div>
                     </div>
                     <div className="bg-slate-700/50 p-2 rounded">
-                        <div className="text-xs text-slate-400">Activity</div>
-                        <div className="text-sm font-medium text-slate-200">
-                            {audioMetrics?.activity_type || 'Scanning...'}
+                        <div className="text-[11px] text-slate-400">Speech Ratio</div>
+                        <div className="text-base font-mono font-bold text-slate-200">
+                            {audioMetrics?.speech_ratio !== undefined ? `${Math.round(audioMetrics.speech_ratio * 100)}%` : '--'}
+                        </div>
+                    </div>
+                    <div className="bg-slate-700/50 p-2 rounded">
+                        <div className="text-[11px] text-slate-400">Activity</div>
+                        <div className="text-xs font-semibold capitalize text-slate-200 truncate" title={audioMetrics?.activity_type}>
+                            {audioMetrics?.activity_type ? audioMetrics.activity_type.replace('_', ' ') : 'Scanning'}
                         </div>
                     </div>
                 </div>
