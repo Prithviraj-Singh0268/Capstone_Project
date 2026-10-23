@@ -36,7 +36,7 @@ class GeminiMultimodalAgent:
 
     def __init__(self):
         self.api_key = os.environ.get("GEMINI_API_KEY")
-        self.model_name = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+        self.model_name = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
         self.client_type = None
         self.client = None
 
