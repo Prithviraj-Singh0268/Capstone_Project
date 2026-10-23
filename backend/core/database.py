@@ -56,8 +56,12 @@ class SessionPerson(Base):
     person_id = Column(String, index=True)
     name = Column(String, nullable=True)
     total_time_present = Column(Float, default=0.0)
+    presence_percentage = Column(Float, default=0.0)
+    attendance_status = Column(String, default="Absent") # "Present" (>=75%), "Partial" (40-74%), "Absent" (<40%)
     avg_attention = Column(Float, default=0.0)
     dominant_emotion = Column(String, nullable=True)
+    first_seen = Column(DateTime, nullable=True)
+    last_seen = Column(DateTime, nullable=True)
     notes = Column(Text, nullable=True)
 
 class PersonMetric(Base):

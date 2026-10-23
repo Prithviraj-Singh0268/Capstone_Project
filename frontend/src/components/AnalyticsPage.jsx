@@ -9,11 +9,13 @@ const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
 
 const AnalyticsPage = ({ sessionId }) => {
     const [trendData, setTrendData] = useState([]);
+    const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (sessionId) {
             fetchTrends(sessionId);
+            fetchAttendance(sessionId);
         }
     }, [sessionId]);
 
@@ -26,6 +28,16 @@ const AnalyticsPage = ({ sessionId }) => {
             console.error("Failed to fetch trends", e);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchAttendance = async (sid) => {
+        try {
+            const res = await fetch(`http://localhost:8000/api/analytics/attendance/${sid}`);
+            const data = await res.json();
+            setAttendanceData(data);
+        } catch (e) {
+            console.error("Failed to fetch attendance", e);
         }
     };
 
@@ -90,6 +102,50 @@ const AnalyticsPage = ({ sessionId }) => {
                         </ResponsiveContainer>
                     </div>
                 </div>
+            </div>
+
+            {/* Attendance & Presence Table */}
+            <div className="mt-8 bg-slate-900 p-6 rounded-xl border border-slate-800">
+                <h3 className="text-lg font-semibold mb-2">Presence-Based Attendance Summary</h3>
+                <p className="text-xs text-slate-400 mb-4">Thresholds: Present (&ge; 75%), Partial (40% - 74%), Absent (&lt; 40%)</p>
+                
+                {attendanceData.length > 0 ? (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr className="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider">
+                                    <th className="py-3 px-4">Participant ID</th>
+                                    <th className="py-3 px-4">Active Duration</th>
+                                    <th className="py-3 px-4">Presence %</th>
+                                    <th className="py-3 px-4">Attendance Status</th>
+                                    <th className="py-3 px-4">Avg Attention</th>
+                                    <th className="py-3 px-4">Dominant Emotion</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/60">
+                                {attendanceData.map((student, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-800/40 transition">
+                                        <td className="py-3 px-4 font-mono font-medium text-slate-200">{student.id}</td>
+                                        <td className="py-3 px-4 text-slate-300">{student.presence_seconds}s</td>
+                                        <td className="py-3 px-4 text-slate-300">{student.presence_percentage}%</td>
+                                        <td className="py-3 px-4">
+                                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold
+                                                ${student.attendance_status === 'Present' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                                                  student.attendance_status === 'Partial' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                                                  'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
+                                                {student.attendance_status}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 px-4 text-slate-300">{student.attention}%</td>
+                                        <td className="py-3 px-4 text-slate-300 capitalize">{student.dominant_emotion || 'neutral'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="text-slate-500 text-sm py-4 italic">No individual participant records found for this session.</div>
+                )}
             </div>
         </div>
     );

@@ -29,7 +29,7 @@ class ReportGenerator:
             elements = []
             
             # Header
-            elements.append(Paragraph(f"EduSense AI - Session Report", self.styles['Title']))
+            elements.append(Paragraph(f"Multimodal Attendance & Engagement Report", self.styles['Title']))
             elements.append(Spacer(1, 12))
             
             # Info
@@ -37,7 +37,7 @@ class ReportGenerator:
                 ["Session ID", str(session.id)],
                 ["Date", session.start_time.strftime("%Y-%m-%d %H:%M")],
                 ["Duration", str(session.end_time - session.start_time) if session.end_time else "N/A"],
-                ["Total Attendees", str(session.people_count)],
+                ["Total Participants", str(session.people_count)],
                 ["Avg Attention", f"{session.total_attention_avg:.1f}%"]
             ]
             t = Table(info_data)
@@ -52,12 +52,14 @@ class ReportGenerator:
             elements.append(Spacer(1, 20))
             
             # Attendees Table
-            elements.append(Paragraph("Attendance Summary", self.styles['Heading2']))
-            data = [["Student Name/ID", "Time Present", "Avg Attention", "Dominant Emotion"]]
+            elements.append(Paragraph("Presence-Based Attendance Summary", self.styles['Heading2']))
+            data = [["Participant ID", "Time Active", "Presence %", "Status", "Avg Attention", "Dominant Emotion"]]
             for p in attendees:
                 data.append([
-                    p.person_id,
+                    p.person_id or "Participant",
                     f"{p.total_time_present:.1f}s",
+                    f"{getattr(p, 'presence_percentage', 0.0):.1f}%",
+                    getattr(p, 'attendance_status', 'N/A'),
                     f"{p.avg_attention:.1f}%",
                     p.dominant_emotion or "N/A"
                 ])

@@ -114,6 +114,10 @@ async def get_classroom_insight():
 async def get_trends(session_id: int):
     return analytics_service.get_session_trends(session_id)
 
+@app.get("/api/analytics/attendance/{session_id}")
+async def get_session_attendance(session_id: int):
+    return analytics_service.get_student_heatmap(session_id)
+
 @app.get("/api/reports/export/{session_id}/pdf")
 async def export_pdf(session_id: int):
     pdf_buffer = report_generator.generate_pdf_report(session_id)

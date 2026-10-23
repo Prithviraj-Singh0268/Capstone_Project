@@ -49,10 +49,12 @@ class AnalyticsService:
              people = db.query(SessionPerson).filter(SessionPerson.session_id == session_id).all()
              return [{
                  'id': p.person_id,
-                 'name': p.person_id, # Placeholder for name
+                 'name': p.person_id,
                  'attention': p.avg_attention,
                  'dominant_emotion': p.dominant_emotion,
-                 'presence': p.total_time_present
+                 'presence_seconds': p.total_time_present,
+                 'presence_percentage': getattr(p, 'presence_percentage', 0.0),
+                 'attendance_status': getattr(p, 'attendance_status', 'N/A')
              } for p in people]
         finally:
              db.close()
