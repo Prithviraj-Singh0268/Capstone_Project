@@ -1,7 +1,7 @@
 import cv2
 import time
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session as DBSession
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
@@ -44,12 +44,12 @@ class SessionManager:
             active = db.query(SessionModel).filter(SessionModel.status == "active").all()
             for s in active:
                 s.status = "completed"
-                s.end_time = datetime.utcnow()
+                s.end_time = datetime.now(timezone.utc)
             
             new_session = SessionModel(
                 teacher_id=teacher_id,
                 class_id=class_id,
-                start_time=datetime.utcnow(),
+                start_time=datetime.now(timezone.utc),
                 status="active"
             )
             db.add(new_session)
@@ -80,7 +80,7 @@ class SessionManager:
             session = db.query(SessionModel).filter(SessionModel.id == self.active_session_id).first()
             if session:
                 session.status = "completed"
-                now_utc = datetime.utcnow()
+                now_utc = datetime.now(timezone.utc).replace(tzinfo=None)  # naive UTC, matches DB storage
                 session.end_time = now_utc
                 total_session_seconds = max(1.0, (now_utc - session.start_time).total_seconds())
                 

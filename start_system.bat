@@ -14,10 +14,10 @@ if exist "%~dp0venv\Scripts\activate.bat" (
 
 echo [1/2] Starting Backend Server on http://localhost:8000 ...
 if defined VENV_ACTIVATE (
-    start "Backend Server" cmd /k "call %VENV_ACTIVATE% && cd /d "%~dp0backend" && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+    start "Backend Server" cmd /k "call %VENV_ACTIVATE% && cd /d "%~dp0backend" && py -3 -m uvicorn main:app --reload --host 0.0.0.0 --port 8000"
 ) else (
-    echo [WARNING] No virtual environment found. Running with global python...
-    start "Backend Server" cmd /k "cd /d "%~dp0backend" && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+    echo [WARNING] No virtual environment found. Running with global py launcher...
+    start "Backend Server" cmd /k "cd /d "%~dp0backend" && py -3 -m uvicorn main:app --reload --host 0.0.0.0 --port 8000"
 )
 echo    -> Backend will run at: http://localhost:8000
 echo.
