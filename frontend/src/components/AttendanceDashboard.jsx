@@ -6,9 +6,7 @@ import RecommendationsPanel from './RecommendationsPanel';
 import AnalyticsPage from './AnalyticsPage';
 import SuggestionBox from './SuggestionBox';
 import { BarChart2, LayoutDashboard } from 'lucide-react';
-
-const API_BASE = 'http://localhost:8000';
-const WS_BASE = 'ws://localhost:8000';
+import { API_BASE, WS_BASE } from '../config';
 
 const AttendanceDashboard = () => {
     const [sessionActive, setSessionActive] = useState(false);

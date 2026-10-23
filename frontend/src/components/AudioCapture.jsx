@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { WS_BASE } from '../config';
 
 const AudioCapture = ({ active, onMetrics }) => {
     const [isRecording, setIsRecording] = useState(false);
@@ -22,7 +23,7 @@ const AudioCapture = ({ active, onMetrics }) => {
             setIsRecording(true);
 
             // Connect WS
-            const ws = new WebSocket('ws://localhost:8000/ws/audio');
+            const ws = new WebSocket(`${WS_BASE}/ws/audio`);
             wsRef.current = ws;
 
             ws.onmessage = (event) => {

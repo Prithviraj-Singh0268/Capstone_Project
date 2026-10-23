@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Lightbulb, Clock, CheckCircle } from 'lucide-react';
+import { API_BASE } from '../config';
 
 const SuggestionBox = () => {
     const [suggestions, setSuggestions] = useState([]);
@@ -15,7 +16,7 @@ const SuggestionBox = () => {
     const fetchSuggestions = async () => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:8000/api/suggestions/current');
+            const res = await fetch(`${API_BASE}/api/suggestions/current`);
             const data = await res.json();
             if (Array.isArray(data) && data.length > 0) {
                 setSuggestions(data);

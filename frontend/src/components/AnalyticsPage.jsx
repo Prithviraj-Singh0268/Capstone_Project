@@ -3,6 +3,7 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { Download, Sparkles, X, BrainCircuit, Activity, Volume2 } from 'lucide-react';
+import { API_BASE } from '../config';
 
 const AnalyticsPage = ({ sessionId }) => {
     const [trendData, setTrendData] = useState([]);
@@ -21,7 +22,7 @@ const AnalyticsPage = ({ sessionId }) => {
 
     const fetchTrends = async (sid) => {
         try {
-            const res = await fetch(`http://localhost:8000/api/analytics/trends/${sid}`);
+            const res = await fetch(`${API_BASE}/api/analytics/trends/${sid}`);
             const data = await res.json();
             setTrendData(data);
         } catch (e) {
@@ -33,7 +34,7 @@ const AnalyticsPage = ({ sessionId }) => {
 
     const fetchAttendance = async (sid) => {
         try {
-            const res = await fetch(`http://localhost:8000/api/analytics/attendance/${sid}`);
+            const res = await fetch(`${API_BASE}/api/analytics/attendance/${sid}`);
             const data = await res.json();
             setAttendanceData(data);
         } catch (e) {
@@ -42,7 +43,7 @@ const AnalyticsPage = ({ sessionId }) => {
     };
 
     const handleExport = (type) => {
-        window.location.href = `http://localhost:8000/api/reports/export/${sessionId}/${type}`;
+        window.location.href = `${API_BASE}/api/reports/export/${sessionId}/${type}`;
     };
 
     const handleViewReflection = async (studentId) => {
@@ -50,7 +51,7 @@ const AnalyticsPage = ({ sessionId }) => {
         setReflectionLoading(true);
         setStudentReflection(null);
         try {
-            const res = await fetch(`http://localhost:8000/api/insights/student/${studentId}`);
+            const res = await fetch(`${API_BASE}/api/insights/student/${studentId}`);
             const data = await res.json();
             setStudentReflection(data.reflection || null);
         } catch (e) {
