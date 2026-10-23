@@ -50,7 +50,7 @@ async def root():
     return {
         "message": "Multimodal Attendance & Engagement Agent running",
         "status": "online",
-        "ai_engine": "Google Gemini (Structured Outputs)" if gemini_agent.gemini_client else "Deterministic Grounded Engine"
+        "ai_engine": "Google Gemini (Structured Outputs)" if gemini_agent.client else "Deterministic Grounded Engine"
     }
 
 # Session Management Endpoints
@@ -291,6 +291,23 @@ async def audio_endpoint(websocket: WebSocket):
 @app.get("/api/audio/summary")
 async def get_audio_summary():
     return audio_analyzer.get_session_summary()
+
+# Production Static SPA Serving (when frontend is built)
+import os
+dist_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
+if os.path.exists(dist_path):
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+    assets_dir = os.path.join(dist_path, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        target = os.path.join(dist_path, full_path)
+        if os.path.isfile(target):
+            return FileResponse(target)
+        return FileResponse(os.path.join(dist_path, "index.html"))
 
 if __name__ == "__main__":
     import uvicorn
