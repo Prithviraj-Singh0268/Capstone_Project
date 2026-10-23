@@ -3,7 +3,7 @@ import time
 import numpy as np
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session as DBSession
-from deep_sort_realtime.deepsort_tracker import DeepSort
+from .centroid_tracker import CentroidTracker
 
 from .database import SessionLocal, Session as SessionModel, SessionPerson, PersonMetric, get_db
 from .emotion_detector_v2 import MediaPipeEmotionDetector
@@ -18,7 +18,7 @@ class SessionManager:
         self.active_session_id = None
         self.active_session_data = None
         # Initialize DeepSORT
-        self.tracker = DeepSort(max_age=60, n_init=3)
+        self.tracker = CentroidTracker(max_age=60, n_init=3)  # lightweight, no torch dep
         self.emotion_detector = MediaPipeEmotionDetector()
         
         # In-memory history for active session:

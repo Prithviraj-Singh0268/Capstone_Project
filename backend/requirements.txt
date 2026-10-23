@@ -11,7 +11,7 @@ websockets>=12.0
 # Computer Vision & Multi-Person Tracking
 opencv-python>=4.9.0
 mediapipe>=0.10.14
-deep-sort-realtime>=1.3.2
+# deep-sort-realtime removed: replaced by core/centroid_tracker.py (pure numpy, no torch dep)
 
 # Audio Signal Extraction & Processing
 librosa>=0.10.1
