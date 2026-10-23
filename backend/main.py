@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Ensure backend directory is in sys.path regardless of execution CWD
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 import cv2

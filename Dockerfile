@@ -35,6 +35,7 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 # Environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
+ENV PYTHONPATH="/app/backend:${PYTHONPATH}"
 
 EXPOSE 8000
 
